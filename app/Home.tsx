@@ -1,7 +1,15 @@
 import React from 'react';
 import { View, Button, Text, StyleSheet } from 'react-native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
-export default function HomeScreen({ navigation }) {
+type RootStackParamList = {
+  PublicarEnvio: undefined;
+  Home: undefined;
+};
+
+type Props = NativeStackScreenProps<RootStackParamList, 'Home'>;
+
+export default function HomeScreen({ navigation }: Props) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Tango App</Text>
@@ -18,9 +26,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#CAF0F8',
   },
   title: {
     fontSize: 24,
     marginBottom: 20,
+    color: '#03045E',
   },
 });

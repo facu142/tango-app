@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Image, Platform } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Image, ScrollView, Platform, TouchableOpacity } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker'; // Importa el Picker del paquete correcto
 import * as ImagePicker from 'expo-image-picker';
 import useProvincias from '@/hooks/useProvincias';
+import moment from 'moment';
 
 export default function PublicarEnvioScreen() {
   const { provincias, localidades, getLocalidadesByProvinciaId } = useProvincias();
@@ -11,26 +12,26 @@ export default function PublicarEnvioScreen() {
   const [tipoCarga, setTipoCarga] = useState('');
   const [calleRetiro, setCalleRetiro] = useState('');
   const [numeroRetiro, setNumeroRetiro] = useState('');
-  const [provinciaRetiro, setProvinciaRetiro] = useState('');
-  const [localidadRetiro, setLocalidadRetiro] = useState('');
+  const [provinciaRetiro, setProvinciaRetiro] = useState<number | undefined>(undefined);
+  const [localidadRetiro, setLocalidadRetiro] = useState<number | undefined>(undefined);
   const [referenciaRetiro, setReferenciaRetiro] = useState('');
-  const [fechaRetiro, setFechaRetiro] = useState(new Date());
+  const [fechaRetiro, setFechaRetiro] = useState<Date>(new Date());
   const [showDatePickerRetiro, setShowDatePickerRetiro] = useState(false);
   const [calleEntrega, setCalleEntrega] = useState('');
   const [numeroEntrega, setNumeroEntrega] = useState('');
-  const [provinciaEntrega, setProvinciaEntrega] = useState('');
-  const [localidadEntrega, setLocalidadEntrega] = useState('');
+  const [provinciaEntrega, setProvinciaEntrega] = useState<number | undefined>(undefined);
+  const [localidadEntrega, setLocalidadEntrega] = useState<number | undefined>(undefined);
   const [referenciaEntrega, setReferenciaEntrega] = useState('');
-  const [fechaEntrega, setFechaEntrega] = useState(new Date());
+  const [fechaEntrega, setFechaEntrega] = useState<Date>(new Date());
   const [showDatePickerEntrega, setShowDatePickerEntrega] = useState(false);
-  const [image, setImage] = useState(null);
+  const [image, setImage] = useState<string | null>(null);
 
-  const handleProvinciaRetiroChange = (provinciaId) => {
+  const handleProvinciaRetiroChange = (provinciaId: number) => {
     setProvinciaRetiro(provinciaId);
     getLocalidadesByProvinciaId(provinciaId);
   };
 
-  const handleProvinciaEntregaChange = (provinciaId) => {
+  const handleProvinciaEntregaChange = (provinciaId: number) => {
     setProvinciaEntrega(provinciaId);
     getLocalidadesByProvinciaId(provinciaId);
   };
@@ -49,7 +50,7 @@ export default function PublicarEnvioScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <Text style={styles.title}>Publicar Pedido de Envío</Text>
 
       {/* Selector de tipo de carga */}
@@ -86,7 +87,7 @@ export default function PublicarEnvioScreen() {
         onValueChange={handleProvinciaRetiroChange}
         style={styles.picker}
       >
-        <Picker.Item label="Seleccione una provincia" value="" />
+        <Picker.Item label="Seleccione una provincia" value={undefined} />
         {provincias.map(provincia => (
           <Picker.Item key={provincia.id} label={provincia.nombre} value={provincia.id} />
         ))}
@@ -96,7 +97,7 @@ export default function PublicarEnvioScreen() {
         onValueChange={setLocalidadRetiro}
         style={styles.picker}
       >
-        <Picker.Item label="Seleccione una localidad" value="" />
+        <Picker.Item label="Seleccione una localidad" value={undefined} />
         {localidades.map(localidad => (
           <Picker.Item key={localidad.id} label={localidad.nombre} value={localidad.id} />
         ))}
@@ -109,7 +110,9 @@ export default function PublicarEnvioScreen() {
       />
 
       {/* DatePicker para fecha de retiro */}
-      <Button title="Seleccionar Fecha de Retiro" onPress={() => setShowDatePickerRetiro(true)} />
+      <View style={styles.datePickerButton} onTouchEnd={() => setShowDatePickerRetiro(true)}>
+        <Text style={styles.datePickerText}>{moment(fechaRetiro).format('DD MMM YYYY')}</Text>
+      </View>
       {showDatePickerRetiro && (
         <DateTimePicker
           value={fechaRetiro}
@@ -143,7 +146,7 @@ export default function PublicarEnvioScreen() {
         onValueChange={handleProvinciaEntregaChange}
         style={styles.picker}
       >
-        <Picker.Item label="Seleccione una provincia" value="" />
+        <Picker.Item label="Seleccione una provincia" value={undefined} />
         {provincias.map(provincia => (
           <Picker.Item key={provincia.id} label={provincia.nombre} value={provincia.id} />
         ))}
@@ -153,7 +156,7 @@ export default function PublicarEnvioScreen() {
         onValueChange={setLocalidadEntrega}
         style={styles.picker}
       >
-        <Picker.Item label="Seleccione una localidad" value="" />
+        <Picker.Item label="Seleccione una localidad" value={undefined} />
         {localidades.map(localidad => (
           <Picker.Item key={localidad.id} label={localidad.nombre} value={localidad.id} />
         ))}
@@ -166,7 +169,9 @@ export default function PublicarEnvioScreen() {
       />
 
       {/* DatePicker para fecha de entrega */}
-      <Button title="Seleccionar Fecha de Entrega" onPress={() => setShowDatePickerEntrega(true)} />
+      <View style={styles.datePickerButton} onTouchEnd={() => setShowDatePickerEntrega(true)}>
+        <Text style={styles.datePickerText}>{moment(fechaEntrega).format('DD MMM YYYY')}</Text>
+      </View>
       {showDatePickerEntrega && (
         <DateTimePicker
           value={fechaEntrega}
@@ -181,9 +186,11 @@ export default function PublicarEnvioScreen() {
       )}
 
       {/* Selector de foto desde la galería */}
-      <Button title="Seleccionar Foto" onPress={pickImage} />
-      {image && <Image source={{ uri: image }} style={styles.image} />}
-    </View>
+      <TouchableOpacity style={styles.imagePickerButton} onPress={pickImage}>
+        <Text style={styles.imagePickerText}>Seleccionar Foto</Text>
+      </TouchableOpacity>
+      {image && <Image source={{ uri: image }} style={styles.imagePreview} />}
+    </ScrollView>
   );
 }
 
@@ -196,25 +203,69 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
+    color: '#03045E',
+  },
+  section: {
+    marginBottom: 20,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#CCCCCC',
+    borderRadius: 8,
+    backgroundColor: '#F0F0F0',
   },
   subtitle: {
     fontSize: 18,
-    marginTop: 20,
+    fontWeight: 'bold',
     marginBottom: 10,
+    color: '#0077B6',
   },
   input: {
+    height: 40,
+    borderColor: '#CCCCCC',
     borderWidth: 1,
-    padding: 10,
-    marginVertical: 5,
     borderRadius: 5,
+    paddingHorizontal: 10,
+    marginBottom: 10,
+    backgroundColor: '#FFFFFF',
   },
   picker: {
     height: 50,
-    width: '100%',
+    borderColor: '#CCCCCC',
+    borderWidth: 1,
+    borderRadius: 5,
+    marginBottom: 10,
+    backgroundColor: '#FFFFFF',
   },
-  image: {
-    width: 200,
+  datePickerButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+    borderColor: '#CCCCCC',
+    borderWidth: 1,
+    borderRadius: 5,
+    backgroundColor: '#FFFFFF',
+    marginBottom: 10,
+  },
+  datePickerText: {
+    flex: 1,
+    fontSize: 16,
+    color: '#333333',
+  },
+  imagePickerButton: {
+    backgroundColor: '#0077B6',
+    padding: 15,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  imagePickerText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+  },
+  imagePreview: {
+    width: '100%',
     height: 200,
-    marginTop: 20,
+    resizeMode: 'cover',
+    marginTop: 10,
   },
 });
